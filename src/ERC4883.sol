@@ -41,11 +41,13 @@ abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
         string memory name_,
         string memory symbol_,
         uint256 price_,
+        address owner_,
         uint256 ownerAllocation_,
         uint256 supplyCap_
     )
         ERC721(name_, symbol_)
     {
+        _transferOwnership(owner_);
         supplyCap = supplyCap_;
         price = price_;
         ownerAllocation = ownerAllocation_;

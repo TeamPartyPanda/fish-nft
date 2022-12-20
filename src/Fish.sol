@@ -16,7 +16,7 @@ contract Fish is ERC4883Composer, Colours, ERC721Holder {
 
     /// EVENTS
 
-    constructor() ERC4883Composer("Fish", "FSH", 0.00042 ether, 99, 4883) {}
+    constructor() ERC4883Composer("Fish", "FSH", 0.00042 ether, 0xeB10511109053787b3ED6cc02d5Cb67A265806cC, 99, 4883) {}
 
     function colourId(uint256 tokenId) public view returns (uint8) {
         if (!_exists(tokenId)) {

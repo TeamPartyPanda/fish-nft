@@ -21,6 +21,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     string public constant NAME = "NAME";
     string public constant SYMBOL = "SYMBOL";
     uint256 public constant PRICE = 0.1 ether;
+    address public constant OWNER = address(42);
     uint256 public constant OWNER_ALLOCATION = 100;
     uint256 public constant SUPPLY_CAP = 1000;
 
@@ -29,13 +30,13 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     address constant OTHER_ADDRESS = address(23);
 
     function setUp() public {
-        token = new MockERC4883Composer(NAME, SYMBOL, PRICE, OWNER_ALLOCATION, SUPPLY_CAP);
+        token = new MockERC4883Composer(NAME, SYMBOL, PRICE, OWNER, OWNER_ALLOCATION, SUPPLY_CAP);
         erc721 = new MockERC721("ERC721", "NFT");
-        background = new MockERC4883("Background", "BACK", 0, 10, 100);
-        accessory1 = new MockERC4883("Accessory1", "ACC1", 0, 10, 100);
-        accessory2 = new MockERC4883("Accessory2", "ACC2", 0, 10, 100);
-        accessory3 = new MockERC4883("Accessory3", "ACC3", 0, 10, 100);
-        accessory4 = new MockERC4883("Accessory4", "ACC4", 0, 10, 100);
+        background = new MockERC4883("Background", "BACK", 0, address(42), 10, 100);
+        accessory1 = new MockERC4883("Accessory1", "ACC1", 0, address(42), 10, 100);
+        accessory2 = new MockERC4883("Accessory2", "ACC2", 0, address(42), 10, 100);
+        accessory3 = new MockERC4883("Accessory3", "ACC3", 0, address(42), 10, 100);
+        accessory4 = new MockERC4883("Accessory4", "ACC4", 0, address(42), 10, 100);
     }
 
     function testMetadata() public {
@@ -45,7 +46,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testOwner() public {
-        assertEq(token.owner(), address(this));
+        assertEq(token.owner(), OWNER);
     }
 
     function testSupportsERC4883() public {
