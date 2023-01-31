@@ -5,6 +5,9 @@ import "forge-std/Script.sol";
 import "../src/Fish.sol";
 import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 
+// Run anvil, then deply and mint
+// anvil
+// forge script script/QAFish.s.sol:QAFishScript --broadcast -vvvv
 contract QAFishScript is Script, ERC721Holder {
     function setUp() public {}
 
