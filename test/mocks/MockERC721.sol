@@ -9,10 +9,10 @@ contract MockERC721 is ERC721 {
     constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {}
 
     function mint() public payable {
+        _safeMint(msg.sender, totalSupply);
+
         unchecked {
             totalSupply++;
         }
-
-        _safeMint(msg.sender, totalSupply);
     }
 }

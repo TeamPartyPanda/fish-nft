@@ -22,7 +22,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     string public constant SYMBOL = "SYMBOL";
     uint256 public constant PRICE = 0.1 ether;
     address public constant OWNER = address(42);
-    uint256 public constant OWNER_ALLOCATION = 100;
+    uint96 public constant OWNER_ALLOCATION = 100;
     uint256 public constant SUPPLY_CAP = 1000;
 
     string constant TOKEN_NAME = "Token Name";
@@ -32,11 +32,11 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function setUp() public {
         token = new MockERC4883Composer(NAME, SYMBOL, PRICE, OWNER, OWNER_ALLOCATION, SUPPLY_CAP);
         erc721 = new MockERC721("ERC721", "NFT");
-        background = new MockERC4883("Background", "BACK", 0, address(42), 10, 100);
-        accessory1 = new MockERC4883("Accessory1", "ACC1", 0, address(42), 10, 100);
-        accessory2 = new MockERC4883("Accessory2", "ACC2", 0, address(42), 10, 100);
-        accessory3 = new MockERC4883("Accessory3", "ACC3", 0, address(42), 10, 100);
-        accessory4 = new MockERC4883("Accessory4", "ACC4", 0, address(42), 10, 100);
+        background = new MockERC4883("Background", "BACK", 0, address(42), 0, 100);
+        accessory1 = new MockERC4883("Accessory1", "ACC1", 0, address(42), 0, 100);
+        accessory2 = new MockERC4883("Accessory2", "ACC2", 0, address(42), 0, 100);
+        accessory3 = new MockERC4883("Accessory3", "ACC3", 0, address(42), 0, 100);
+        accessory4 = new MockERC4883("Accessory4", "ACC4", 0, address(42), 0, 100);
     }
 
     function testMetadata() public {
@@ -54,7 +54,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRenderTokenById() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
 
         string memory renderedOutput = token.renderTokenById(tokenId);
@@ -63,19 +63,19 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         background.mint();
 
-        background.approve(address(token), 1);
-        token.addBackground(tokenId, address(background), 1);
+        background.approve(address(token), 0);
+        token.addBackground(tokenId, address(background), 0);
 
         string memory renderedOutputWithBackgroundAndAccessories = token.renderTokenById(tokenId);
 
@@ -87,8 +87,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
 
     // Accessories
     function testAddAccessory() public {
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -99,46 +99,47 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddAccessories() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
     }
 
     function testAddAccessoriesMaximumAccessories() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
         accessory4.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
-        accessory4.approve(address(token), 1);
+        accessory4.approve(address(token), 0);
         vm.expectRevert(ERC4883Composer.MaximumAccessories.selector);
-        token.addAccessory(tokenId, address(accessory4), 1);
+        token.addAccessory(tokenId, address(accessory4), 0);
     }
 
     function testAddAccessoryNonexistentToken(uint256 tokenId) public {
-        uint256 accessoryTokenId = 1;
+        vm.assume(tokenId >= OWNER_ALLOCATION);
+        uint256 accessoryTokenId = 0;
         accessory1.mint();
 
         accessory1.approve(address(token), accessoryTokenId);
@@ -149,8 +150,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function testAddAccessoryNotTokenOwner(address notTokenOwner) public {
         vm.assume(notTokenOwner != address(this));
 
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -162,8 +163,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddAccessoryNotERC4883() public {
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         erc721.mint();
 
@@ -174,23 +175,23 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddAccessoryAlreadyAdded() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory1.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory1.approve(address(token), 2);
+        accessory1.approve(address(token), 1);
 
         vm.expectRevert(ERC4883Composer.AccessoryAlreadyAdded.selector);
-        token.addAccessory(tokenId, address(accessory1), 2);
+        token.addAccessory(tokenId, address(accessory1), 1);
     }
 
     function testAddAccessoryNotAccessoryOwner() public {
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
 
         vm.startPrank(OTHER_ADDRESS);
@@ -203,8 +204,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddAccessoryNoAllowance() public {
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -213,8 +214,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRemoveAccessory() public {
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -226,20 +227,20 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRemoveAccessories() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         token.removeAccessory(tokenId, address(accessory1));
         token.removeAccessory(tokenId, address(accessory2));
@@ -249,8 +250,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function testRemoveAccessoryNotTokenOwner(address notTokenOwner) public {
         vm.assume(notTokenOwner != address(this));
 
-        uint256 tokenId = 1;
-        uint256 accessoryTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 accessoryTokenId = 0;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -265,7 +266,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function testRemoveAccessoryAccessoryNotFound(address notTokenOwner) public {
         vm.assume(notTokenOwner != address(this));
 
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -277,7 +278,7 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
         vm.assume(notTokenOwner != address(this));
         vm.assume(otherTokenId != 1);
 
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
 
@@ -286,87 +287,87 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRemoveAccessoriesAccessoryNotFound() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
         accessory4.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         vm.expectRevert(ERC4883Composer.AccessoryNotFound.selector);
         token.removeAccessory(tokenId, address(accessory4));
     }
 
     function testRemoveAccessory1() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         token.removeAccessory(tokenId, address(accessory1));
     }
 
     function testRemoveAccessory2() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         token.removeAccessory(tokenId, address(accessory2));
     }
 
     function testRemoveAccessory3() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         accessory1.mint();
         accessory2.mint();
         accessory3.mint();
 
-        accessory1.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory1), 1);
+        accessory1.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory1), 0);
 
-        accessory2.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory2), 1);
+        accessory2.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory2), 0);
 
-        accessory3.approve(address(token), 1);
-        token.addAccessory(tokenId, address(accessory3), 1);
+        accessory3.approve(address(token), 0);
+        token.addAccessory(tokenId, address(accessory3), 0);
 
         token.removeAccessory(tokenId, address(accessory3));
     }
 
     // Background
     function testAddBackground() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 
@@ -375,7 +376,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddBackgroundNonexistentToken(uint256 tokenId) public {
-        uint256 backgroundTokenId = 1;
+        vm.assume(tokenId >= OWNER_ALLOCATION);
+        uint256 backgroundTokenId = 0;
         background.mint();
 
         background.approve(address(token), backgroundTokenId);
@@ -386,8 +388,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function testAddBackgroundNotTokenOwner(address notTokenOwner) public {
         vm.assume(notTokenOwner != address(this));
 
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 
@@ -399,8 +401,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddBackgroundNotERC4883() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         erc721.mint();
 
@@ -411,23 +413,23 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddBackgroundAlreadyAdded() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
         token.mint{value: PRICE}();
         background.mint();
         background.mint();
 
-        background.approve(address(token), 1);
-        token.addBackground(tokenId, address(background), 1);
+        background.approve(address(token), 0);
+        token.addBackground(tokenId, address(background), 0);
 
-        background.approve(address(token), 2);
+        background.approve(address(token), 1);
 
         vm.expectRevert(ERC4883Composer.BackgroundAlreadyAdded.selector);
-        token.addBackground(tokenId, address(background), 2);
+        token.addBackground(tokenId, address(background), 1);
     }
 
     function testAddBackgroundNotBackgroundOwner() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
 
         vm.startPrank(OTHER_ADDRESS);
@@ -440,8 +442,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testAddBackgroundNoAllowance() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 
@@ -450,8 +452,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRemoveBackground() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 
@@ -463,8 +465,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     function testRemoveBackgroundNotTokenOwner(address notTokenOwner) public {
         vm.assume(notTokenOwner != address(this));
 
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 
@@ -477,8 +479,8 @@ contract ERC4883ComposerTest is Test, ERC721Holder {
     }
 
     function testRemoveBackgroundBackgroundAlreadyRemoved() public {
-        uint256 tokenId = 1;
-        uint256 backgroundTokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION;
+        uint256 backgroundTokenId = 0;
         token.mint{value: PRICE}();
         background.mint();
 

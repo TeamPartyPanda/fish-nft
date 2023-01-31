@@ -13,7 +13,7 @@ contract ERC4883Test is Test, ERC721Holder {
     string public constant SYMBOL = "SYMBOL";
     uint256 public constant PRICE = 0.1 ether;
     address public constant OWNER = address(42);
-    uint256 public constant OWNER_ALLOCATION = 100;
+    uint96 public constant OWNER_ALLOCATION = 100;
     uint256 public constant SUPPLY_CAP = 1000;
 
     function setUp() public {
@@ -35,7 +35,7 @@ contract ERC4883Test is Test, ERC721Holder {
     }
 
     function testNoMint() public {
-        assertEq(token.totalSupply(), 0);
+        assertEq(token.totalSupply(), OWNER_ALLOCATION);
     }
 
     function testMint(uint96 amount) public {
@@ -43,9 +43,9 @@ contract ERC4883Test is Test, ERC721Holder {
         token.mint{value: amount}();
 
         assertEq(address(token).balance, amount);
-        assertEq(token.totalSupply(), 1);
+        assertEq(token.totalSupply(), OWNER_ALLOCATION + 1);
         assertEq(token.balanceOf(address(this)), 1);
-        assertEq(token.ownerOf(1), address(this));
+        assertEq(token.ownerOf(OWNER_ALLOCATION), address(this));
     }
 
     function testMintToAddress(uint96 amount, address to) public {
@@ -54,9 +54,9 @@ contract ERC4883Test is Test, ERC721Holder {
         token.mint{value: amount}(to);
 
         assertEq(address(token).balance, amount);
-        assertEq(token.totalSupply(), 1);
+        assertEq(token.totalSupply(), OWNER_ALLOCATION + 1);
         assertEq(token.balanceOf(address(to)), 1);
-        assertEq(token.ownerOf(1), address(to));
+        assertEq(token.ownerOf(OWNER_ALLOCATION), address(to));
     }
 
     function testMintWithInsufficientPrice(uint96 amount) public {
@@ -67,21 +67,21 @@ contract ERC4883Test is Test, ERC721Holder {
 
         assertEq(address(token).balance, 0 ether);
 
-        assertEq(token.totalSupply(), 0);
+        assertEq(token.totalSupply(), OWNER_ALLOCATION);
         assertEq(token.balanceOf(address(this)), 0);
     }
 
     function testMintWithinCap() public {
-        for (uint256 index = 0; index < token.supplyCap(); index++) {
+        for (uint256 index = OWNER_ALLOCATION; index < token.supplyCap(); index++) {
             token.mint{value: PRICE}();
         }
 
         assertEq(token.totalSupply(), token.supplyCap());
-        assertEq(token.balanceOf(address(this)), token.supplyCap());
+        assertEq(token.balanceOf(address(this)), token.supplyCap() - OWNER_ALLOCATION);
     }
 
     function testMintOverCap() public {
-        for (uint256 index = 0; index < token.supplyCap(); index++) {
+        for (uint256 index = OWNER_ALLOCATION; index < token.supplyCap(); index++) {
             token.mint{value: PRICE}();
         }
 
@@ -89,11 +89,11 @@ contract ERC4883Test is Test, ERC721Holder {
         token.mint{value: PRICE}();
 
         assertEq(token.totalSupply(), token.supplyCap());
-        assertEq(token.balanceOf(address(this)), token.supplyCap());
+        assertEq(token.balanceOf(address(this)), token.supplyCap() - OWNER_ALLOCATION);
     }
 
     function testTokenUriNonexistentToken() public {
-        uint256 tokenId = 1;
+        uint256 tokenId = OWNER_ALLOCATION + 1;
         vm.expectRevert(ERC4883.NonexistentToken.selector);
         token.tokenURI(tokenId);
     }
@@ -129,57 +129,6 @@ contract ERC4883Test is Test, ERC721Holder {
         assertEq(address(recipient).balance, 0 ether);
     }
 
-    /// Owner Mint
-    function testOwnerMint(address to) public {
-        vm.assume(to != address(0));
-        vm.prank(OWNER);
-        token.ownerMint(to);
+    // owner supply tests
 
-        assertEq(token.totalSupply(), token.ownerAllocation());
-        assertEq(token.ownerOf(1), to);
-        assertEq(token.ownerOf(token.ownerAllocation()), to);
-        assertEq(token.balanceOf(to), token.ownerAllocation());
-    }
-
-    function testOwnerMintWhenNotOwner(address nonOwner, address to) public {
-        vm.assume(to != address(0));
-        vm.assume(nonOwner != OWNER);
-        vm.assume(nonOwner != address(0));
-
-        vm.prank(nonOwner);
-        vm.expectRevert("Ownable: caller is not the owner");
-        token.ownerMint(to);
-
-        assertEq(token.totalSupply(), 0);
-        assertEq(token.balanceOf(address(nonOwner)), 0);
-    }
-
-    function testOwnerMintWhenOwnerAlreadyMinted(address to) public {
-        vm.assume(to != address(0));
-        vm.prank(OWNER);
-        token.ownerMint(to);
-
-        vm.expectRevert(ERC4883.OwnerAlreadyMinted.selector);
-        vm.prank(OWNER);
-        token.ownerMint(to);
-
-        assertEq(token.totalSupply(), token.ownerAllocation());
-        assertEq(token.balanceOf(address(to)), token.ownerAllocation());
-    }
-
-    function testOwnerMintNearCap(address to) public {
-        vm.assume(to != address(0));
-
-        for (uint256 index = 0; index < token.supplyCap() - 1; index++) {
-            token.mint{value: PRICE}();
-        }
-
-        vm.prank(OWNER);
-        token.ownerMint(to);
-
-        assertEq(token.ownerOf(token.totalSupply()), to);
-        assertEq(token.totalSupply(), token.supplyCap());
-        assertEq(token.balanceOf(address(this)), token.supplyCap() - 1);
-        assertEq(token.balanceOf(address(to)), 1);
-    }
 }

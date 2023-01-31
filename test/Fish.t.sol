@@ -66,6 +66,7 @@ contract FishTest is Test, ERC721Holder {
     }
 
     function testColourIdNonexistentToken(uint256 tokenId) public {
+        vm.assume(tokenId > OWNER_ALLOCATION);
         vm.expectRevert(ERC4883.NonexistentToken.selector);
         token.colourId(tokenId);
     }

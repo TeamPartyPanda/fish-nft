@@ -9,7 +9,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {ERC721Consecutive} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Consecutive.sol";
 
-abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
+abstract contract ERC4883 is ERC721, ERC721Consecutive, Ownable, IERC4883 {
     /// ERRORS
 
     /// @notice Thrown when supply cap reached
@@ -33,7 +33,7 @@ abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
     uint256 public immutable supplyCap;
 
     bool private ownerMinted = false;
-    uint256 public immutable ownerAllocation;
+    uint96 public immutable ownerAllocation;
 
     uint256 public immutable price;
 
@@ -42,7 +42,7 @@ abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
         string memory symbol_,
         uint256 price_,
         address owner_,
-        uint256 ownerAllocation_,
+        uint96 ownerAllocation_,
         uint256 supplyCap_
     )
         ERC721(name_, symbol_)
@@ -51,10 +51,39 @@ abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
         supplyCap = supplyCap_;
         price = price_;
         ownerAllocation = ownerAllocation_;
+        totalSupply = ownerAllocation;
+
+        _mintConsecutive(owner_, ownerAllocation_);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override (ERC721, IERC165) returns (bool) {
         return interfaceId == type(IERC4883).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+        function _ownerOf(uint256 tokenId) internal view virtual override(ERC721, ERC721Consecutive) returns (address) {
+        return super._ownerOf(tokenId);
+    }
+
+    function _mint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Consecutive) {
+        super._mint(to, tokenId);
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+    }
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 firstTokenId,
+        uint256 batchSize
+    ) internal virtual override(ERC721, ERC721Consecutive) {
+        super._afterTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
     function mint() public payable {
@@ -72,33 +101,12 @@ abstract contract ERC4883 is ERC721, Ownable, IERC4883 {
         _mint(to);
     }
 
-    function ownerMint(address to) public onlyOwner {
-        if (ownerMinted) {
-            revert OwnerAlreadyMinted();
-        }
-
-        uint256 available = ownerAllocation;
-        if (totalSupply + ownerAllocation > supplyCap) {
-            available = supplyCap - totalSupply;
-        }
-
-        for (uint256 index = 0; index < available;) {
-            _mint(to);
-
-            unchecked {
-                ++index;
-            }
-        }
-
-        ownerMinted = true;
-    }
-
     function _mint(address to) internal {
+        _mint(to, totalSupply);
+
         unchecked {
             totalSupply++;
         }
-
-        _safeMint(to, totalSupply);
     }
 
     function withdraw(address to) public onlyOwner {

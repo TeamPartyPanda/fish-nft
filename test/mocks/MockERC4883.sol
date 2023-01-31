@@ -10,7 +10,7 @@ contract MockERC4883 is ERC4883 {
         string memory symbol_,
         uint256 price_,
         address owner_,
-        uint256 ownerAllocation_,
+        uint96 ownerAllocation_,
         uint256 supplyCap_
     )
         ERC4883(name_, symbol_, price_, owner_, ownerAllocation_, supplyCap_)
