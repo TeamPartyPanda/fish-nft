@@ -44,9 +44,7 @@ abstract contract ERC4883 is ERC721, ERC721Consecutive, Ownable, IERC4883 {
         address owner_,
         uint96 ownerAllocation_,
         uint256 supplyCap_
-    )
-        ERC721(name_, symbol_)
-    {
+    ) ERC721(name_, symbol_) {
         _transferOwnership(owner_);
         supplyCap = supplyCap_;
         price = price_;
@@ -56,11 +54,11 @@ abstract contract ERC4883 is ERC721, ERC721Consecutive, Ownable, IERC4883 {
         _mintConsecutive(owner_, ownerAllocation_);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override (ERC721, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, IERC165) returns (bool) {
         return interfaceId == type(IERC4883).interfaceId || super.supportsInterface(interfaceId);
     }
 
-        function _ownerOf(uint256 tokenId) internal view virtual override(ERC721, ERC721Consecutive) returns (address) {
+    function _ownerOf(uint256 tokenId) internal view virtual override(ERC721, ERC721Consecutive) returns (address) {
         return super._ownerOf(tokenId);
     }
 
@@ -68,21 +66,19 @@ abstract contract ERC4883 is ERC721, ERC721Consecutive, Ownable, IERC4883 {
         super._mint(to, tokenId);
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 firstTokenId,
-        uint256 batchSize
-    ) internal virtual override {
+    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
+        internal
+        virtual
+        override
+    {
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 firstTokenId,
-        uint256 batchSize
-    ) internal virtual override(ERC721, ERC721Consecutive) {
+    function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize)
+        internal
+        virtual
+        override(ERC721, ERC721Consecutive)
+    {
         super._afterTokenTransfer(from, to, firstTokenId, batchSize);
     }
 

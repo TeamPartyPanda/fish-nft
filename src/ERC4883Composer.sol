@@ -71,9 +71,7 @@ abstract contract ERC4883Composer is ERC4883 {
         address owner_,
         uint96 ownerAllocation_,
         uint256 supplyCap_
-    )
-        ERC4883(name_, symbol_, price_, owner_, ownerAllocation_, supplyCap_)
-    {}
+    ) ERC4883(name_, symbol_, price_, owner_, ownerAllocation_, supplyCap_) {}
 
     function _generateTokenName(address tokenAddress) internal view virtual returns (string memory) {
         string memory tokenName = "";

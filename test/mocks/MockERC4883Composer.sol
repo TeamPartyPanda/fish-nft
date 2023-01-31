@@ -13,9 +13,7 @@ contract MockERC4883Composer is ERC4883Composer, ERC721Holder {
         address owner_,
         uint96 ownerAllocation_,
         uint256 supplyCap_
-    )
-        ERC4883Composer(name_, symbol_, price_, owner_, ownerAllocation_, supplyCap_)
-    {}
+    ) ERC4883Composer(name_, symbol_, price_, owner_, ownerAllocation_, supplyCap_) {}
 
     function _generateDescription(uint256 tokenId) internal view virtual override returns (string memory) {
         return string.concat(name(), " #", Strings.toString(tokenId));
